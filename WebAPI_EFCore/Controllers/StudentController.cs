@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI_EFCore.Entities;
 using WebAPI_EFCore_Data.Context;
 using WebAPI_EFCore_Data.Models;
 
@@ -46,23 +47,51 @@ namespace WebAPI_EFCore.Controllers
 
 
         [HttpPost("Add")]
-        public IActionResult AddStudent(Student student)
+        public IActionResult AddStudent(StudentDTO student)
         {
             if (student == null)
             {
                 return BadRequest("Invalid student data.");
             }
 
-            context.Students.Add(student);
+            var newStudent = new Student
+            {
+                Name = student.Name,
+                Address = student.Address,
+                Parentage = student.Parentage,
+            };
+
+            context.Students.Add(newStudent);
             context.SaveChanges();
             return Ok("Student added successfully.");
             //return CreatedAtAction(nameof(GetStudents), new { id = student.Id }, student);
         }
 
-        [HttpPut("Update")]
-        public IActionResult UpdateStudent(Student student)
+        [HttpPost("Add")]
+        public IActionResult AddStudent2([FromQuery]StudentDTO student)
         {
-            var existingStudent = context.Students.Find(student.Id);
+            if (student == null)
+            {
+                return BadRequest("Invalid student data.");
+            }
+
+            var newStudent = new Student
+            {
+                Name = student.Name,
+                Address = student.Address,
+                Parentage = student.Parentage,
+            };
+
+            context.Students.Add(newStudent);
+            context.SaveChanges();
+            return Ok("Student added successfully.");
+            //return CreatedAtAction(nameof(GetStudents), new { id = student.Id }, student);
+        }
+
+        [HttpPut("Update/{id}")]
+        public IActionResult UpdateStudent(StudentDTO student, int id)
+        {
+            var existingStudent = context.Students.Find(id);
             if (existingStudent == null)
             {
                 return NotFound("Student not found.");
