@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using WebAPI_EFCore.Entities;
-using WebAPI_EFCore_Data.Context;
 using WebAPI_EFCore_Data.Models;
+using WebAPI_EFCore_Service.Interfaces;
+using WebAPI_EFCore_Service.Services;
+
 
 namespace WebAPI_EFCore.Controllers
 {
@@ -10,16 +13,16 @@ namespace WebAPI_EFCore.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        public readonly APIDBContext context;
-        public StudentController(APIDBContext context)
+        private readonly IStudentService _studentService;
+        public StudentController(IStudentService studentService)
         {
-            this.context = context;
+            _studentService = studentService;
         }
 
         [HttpGet("GetAll")]
-        public IActionResult GetStudents()
+        public async Task<IActionResult> GetStudents()
         {
-            var students = context.Students.Where(s => s.Status).ToList();
+            var students = await _studentService.GetStudents();
             if (students != null && students.Any())
             {
                 return Ok(students);
@@ -32,9 +35,9 @@ namespace WebAPI_EFCore.Controllers
         }
 
         [HttpGet("GetById/{id}")]
-        public IActionResult GetStudent(int id)
+        public async Task<IActionResult> GetStudent(int id)
         {
-            var student = context.Students.Find(id);
+            var student = await _studentService.GetStudentById(id);
             if (student != null && student.Status)
             {
                 return Ok(student);
@@ -47,7 +50,7 @@ namespace WebAPI_EFCore.Controllers
 
 
         [HttpPost("Add")]
-        public IActionResult AddStudent(StudentDTO student)
+        public async Task<IActionResult> AddStudent(StudentDTO student)
         {
             if (student == null)
             {
@@ -56,64 +59,49 @@ namespace WebAPI_EFCore.Controllers
 
             var newStudent = new Student
             {
+                RollNo = student.RollNo,
                 Name = student.Name,
                 Address = student.Address,
                 Parentage = student.Parentage,
             };
 
-            context.Students.Add(newStudent);
-            context.SaveChanges();
+            await _studentService.AddStudent(newStudent);
             return Ok("Student added successfully.");
-            //return CreatedAtAction(nameof(GetStudents), new { id = student.Id }, student);
         }
 
-        [HttpPost("Add")]
-        public IActionResult AddStudent2([FromQuery]StudentDTO student)
-        {
-            if (student == null)
-            {
-                return BadRequest("Invalid student data.");
-            }
-
-            var newStudent = new Student
-            {
-                Name = student.Name,
-                Address = student.Address,
-                Parentage = student.Parentage,
-            };
-
-            context.Students.Add(newStudent);
-            context.SaveChanges();
-            return Ok("Student added successfully.");
-            //return CreatedAtAction(nameof(GetStudents), new { id = student.Id }, student);
-        }
 
         [HttpPut("Update/{id}")]
-        public IActionResult UpdateStudent(StudentDTO student, int id)
+        public async Task<IActionResult> UpdateStudent(StudentDTO student, int id)
         {
-            var existingStudent = context.Students.Find(id);
-            if (existingStudent == null)
+            var newStudent = new Student
+            {
+                Name = student.Name,
+                Address = student.Address,
+                Parentage = student.Parentage,
+            };
+            var updatedStudent = await _studentService.UpdateStudent(id, newStudent);
+            if (updatedStudent == null)
             {
                 return NotFound("Student not found.");
             }
-            existingStudent.Name = student.Name;
-            existingStudent.Address = student.Address;
-            existingStudent.Parentage = student.Parentage;
-            context.SaveChanges();
-            return Ok("Student updated successfully.");
+            else
+            {
+                return Ok("Student updated successfully.");
+            }
         }
 
         [HttpDelete("Delete/{id}")]
-        public IActionResult DeleteStudent(int id)
+        public async Task<IActionResult> DeleteStudent(int id)
         {
-            var student = context.Students.Find(id);
-            if (student == null)
+            var isDeleted = await _studentService.DeleteStudent(id);
+            if (!isDeleted)
             {
                 return NotFound("Student not found.");
             }
-            student.Status = false; // Soft delete
-            context.SaveChanges();
-            return Ok("Student deleted successfully.");
+            else
+            {
+                return Ok("Student deleted successfully.");
+            }
         }
     }
 }

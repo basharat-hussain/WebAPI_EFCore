@@ -1,6 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using WebAPI_EFCore_Data.Context;
+using WebAPI_EFCore_Service.Interfaces;
+using WebAPI_EFCore_Service.Services;
 
 namespace WebAPI_EFCore
 {
@@ -18,7 +20,7 @@ namespace WebAPI_EFCore
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<APIDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("APiConnection")));
-
+            builder.Services.AddScoped<IStudentService, StudentService>();
 
             var app = builder.Build();
 

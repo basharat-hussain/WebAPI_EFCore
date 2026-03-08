@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebAPI_EFCore_Data\WebAPI_EFCore_Data.csproj" />
+    <ProjectReference Include="..\WebAPI_EFCore_Service\WebAPI_EFCore_Service.csproj" />
   </ItemGroup>
 
 </Project>
