@@ -14,9 +14,12 @@ namespace WebAPI_EFCore.Controllers
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;
-        public StudentController(IStudentService studentService)
+        private readonly ILogger<StudentController> logger;
+
+        public StudentController(IStudentService studentService, ILogger<StudentController> logger)
         {
             _studentService = studentService;
+            this.logger = logger;
         }
 
         [HttpGet("GetAll")]
@@ -25,6 +28,7 @@ namespace WebAPI_EFCore.Controllers
             var students = await _studentService.GetStudents();
             if (students != null && students.Any())
             {
+                logger.LogInformation("Retrieved {Count} active students.", students.Count());
                 return Ok(students);
 
             }
